@@ -19,11 +19,11 @@ const router = useRouter();
 const healthyApps = computed(() => props.apps.filter((app) => app.healthy));
 
 function navigateToApp(appName: string, path: string): void {
-  router.push({ name: "mfe-app", params: { appName, pathMatch: path.replace(/^\//, "").split("/") } });
+  router.push(`/app/${appName}${path}`);
 }
 
 function isActiveApp(appName: string): boolean {
-  return route.params.appName === appName;
+  return route.path.startsWith(`/app/${appName}`);
 }
 </script>
 

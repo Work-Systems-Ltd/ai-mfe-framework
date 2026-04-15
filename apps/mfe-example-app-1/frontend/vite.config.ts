@@ -1,10 +1,20 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
+import federation from "@originjs/vite-plugin-federation";
 import { resolve } from "path";
 
 export default defineConfig({
-  plugins: [vue()],
-  base: "/apps/example1/",
+  plugins: [
+    vue(),
+    federation({
+      name: "example1",
+      filename: "remoteEntry.js",
+      exposes: {
+        "./routes": "./src/routes.ts",
+      },
+      shared: ["vue", "vue-router", "pinia"],
+    }),
+  ],
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
@@ -12,19 +22,15 @@ export default defineConfig({
     },
     dedupe: ["vue", "pinia", "vue-router"],
   },
-  optimizeDeps: {
-    include: ["vue", "pinia", "vue-router"],
+  build: {
+    target: "esnext",
+    cssCodeSplit: false,
   },
   server: {
     port: 5174,
     allowedHosts: true,
-    hmr: {
-      host: "localhost",
-      port: 5174,
-      protocol: "ws",
-    },
+    cors: true,
     watch: {
-      // Use polling since inotify doesn't work across Docker bind mounts
       usePolling: true,
       interval: 1000,
     },

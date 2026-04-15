@@ -1,11 +1,26 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
+import federation from "@originjs/vite-plugin-federation";
 import { resolve } from "path";
 
 const backendTarget = process.env.PROXY_TARGET || "http://localhost:8000";
+const example1Remote = process.env.EXAMPLE1_REMOTE_URL || "http://localhost:5174";
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    federation({
+      name: "shell",
+      remotes: {
+        example1: {
+          external: `${example1Remote}/assets/remoteEntry.js`,
+          format: "esm",
+          from: "vite",
+        },
+      },
+      shared: ["vue", "vue-router", "pinia"],
+    }),
+  ],
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
@@ -15,6 +30,9 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ["keycloak-js", "vue", "pinia", "vue-router"],
+  },
+  build: {
+    target: "esnext",
   },
   server: {
     port: 5173,
@@ -32,18 +50,8 @@ export default defineConfig({
         target: backendTarget,
         changeOrigin: true,
       },
-      // In dev: proxy example app frontend directly to its Vite dev server
-      // and API calls to the shell backend (which proxies to the app backend)
+      // API calls to sub-apps go through shell backend
       "/apps/example1/api": {
-        target: backendTarget,
-        changeOrigin: true,
-      },
-      "/apps/example1": {
-        target: process.env.EXAMPLE1_FRONTEND || "http://localhost:5174",
-        changeOrigin: true,
-      },
-      // Fallback: any other /apps/* goes to shell backend
-      "/apps": {
         target: backendTarget,
         changeOrigin: true,
       },

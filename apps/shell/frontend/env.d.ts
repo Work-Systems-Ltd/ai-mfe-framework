@@ -6,6 +6,12 @@ declare module "*.vue" {
   export default component;
 }
 
+// Module Federation remote declarations
+declare module "example1/routes" {
+  import type { RouteRecordRaw } from "vue-router";
+  export const routes: RouteRecordRaw[];
+}
+
 interface ImportMetaEnv {
   readonly VITE_API_URL: string;
   readonly VITE_KEYCLOAK_URL: string;
