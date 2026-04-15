@@ -28,7 +28,7 @@ onMounted(async () => {
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold text-blue-600">Items</h1>
       <router-link
-        to="/items/new"
+        :to="{ name: 'example1-item-create' }"
         class="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90"
       >
         Create Item
@@ -45,7 +45,7 @@ onMounted(async () => {
       <router-link
         v-for="item in items"
         :key="item.id"
-        :to="`/items/${item.id}`"
+        :to="{ name: 'example1-item-detail', params: { id: item.id } }"
         class="block border rounded-lg p-4 hover:shadow-md transition-shadow"
       >
         <h3 class="font-medium">{{ item.name }}</h3>
@@ -54,7 +54,3 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-<!-- test Wed 15 Apr 2026 06:38:46 AM UTC -->
-<!-- polling-test Wed 15 Apr 2026 06:40:20 AM UTC -->
-<!-- HOST WRITE Wed 15 Apr 2026 06:45:12 AM UTC -->
-<!-- POLL TEST Wed 15 Apr 2026 06:45:38 AM UTC -->

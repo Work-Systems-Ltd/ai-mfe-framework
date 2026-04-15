@@ -14,6 +14,19 @@ COPY apps/shell/frontend/package.json apps/shell/frontend/package-lock.json* ./
 RUN npm install
 
 COPY apps/shell/frontend/ ./
+
+ARG VITE_API_URL=http://localhost:8000
+ARG VITE_KEYCLOAK_URL=http://localhost:8080
+ARG VITE_KEYCLOAK_REALM=mfe
+ARG VITE_KEYCLOAK_CLIENT_ID=mfe-shell
+ARG EXAMPLE1_REMOTE_URL=http://localhost:5174
+
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_KEYCLOAK_URL=$VITE_KEYCLOAK_URL
+ENV VITE_KEYCLOAK_REALM=$VITE_KEYCLOAK_REALM
+ENV VITE_KEYCLOAK_CLIENT_ID=$VITE_KEYCLOAK_CLIENT_ID
+ENV EXAMPLE1_REMOTE_URL=$EXAMPLE1_REMOTE_URL
+
 RUN npm run build
 
 # Production stage

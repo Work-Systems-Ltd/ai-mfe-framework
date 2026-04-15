@@ -11,6 +11,9 @@ export default defineConfig({
       filename: "remoteEntry.js",
       exposes: {
         "./routes": "./src/routes.ts",
+        "./ItemListView": "./src/views/ItemListView.vue",
+        "./ItemCreateView": "./src/views/ItemCreateView.vue",
+        "./ItemDetailView": "./src/views/ItemDetailView.vue",
       },
       shared: ["vue", "vue-router", "pinia"],
     }),

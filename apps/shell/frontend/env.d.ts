@@ -12,6 +12,24 @@ declare module "example1/routes" {
   export const routes: RouteRecordRaw[];
 }
 
+declare module "example1/ItemListView" {
+  import type { DefineComponent } from "vue";
+  const component: DefineComponent<object, object, unknown>;
+  export default component;
+}
+
+declare module "example1/ItemCreateView" {
+  import type { DefineComponent } from "vue";
+  const component: DefineComponent<object, object, unknown>;
+  export default component;
+}
+
+declare module "example1/ItemDetailView" {
+  import type { DefineComponent } from "vue";
+  const component: DefineComponent<object, object, unknown>;
+  export default component;
+}
+
 interface ImportMetaEnv {
   readonly VITE_API_URL: string;
   readonly VITE_KEYCLOAK_URL: string;

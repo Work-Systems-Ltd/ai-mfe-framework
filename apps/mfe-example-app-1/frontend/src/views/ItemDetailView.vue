@@ -29,7 +29,7 @@ async function deleteItem(): Promise<void> {
   if (!item.value) return;
   try {
     await apiFetch(`/apps/example1/api/items/${item.value.id}`, { method: "DELETE" });
-    router.push("/items");
+    router.push({ name: "example1-item-list" });
   } catch (error) {
     console.error("Failed to delete:", error);
   }
