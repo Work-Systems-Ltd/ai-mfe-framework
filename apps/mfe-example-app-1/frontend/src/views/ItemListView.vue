@@ -26,7 +26,7 @@ onMounted(async () => {
 <template>
   <div>
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-xl font-bold">Items</h1>
+      <h1 class="text-2xl font-bold text-blue-600">Items</h1>
       <router-link
         to="/items/new"
         class="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90"
