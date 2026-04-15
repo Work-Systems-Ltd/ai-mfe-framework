@@ -9,20 +9,26 @@ export default defineConfig({
       "@": resolve(__dirname, "src"),
       "@common": resolve(__dirname, "../../../common/templates/frontend/src"),
     },
+    // Ensure imports from @common resolve deps from this app's node_modules
+    dedupe: ["vue", "pinia", "vue-router", "keycloak-js"],
+  },
+  optimizeDeps: {
+    include: ["keycloak-js", "vue", "pinia", "vue-router"],
   },
   server: {
     port: 5173,
+    allowedHosts: true,
     proxy: {
       "/api": {
-        target: "http://localhost:8000",
+        target: process.env.PROXY_TARGET || "http://localhost:8000",
         changeOrigin: true,
       },
       "/internal": {
-        target: "http://localhost:8000",
+        target: process.env.PROXY_TARGET || "http://localhost:8000",
         changeOrigin: true,
       },
       "/apps": {
-        target: "http://localhost:8000",
+        target: process.env.PROXY_TARGET || "http://localhost:8000",
         changeOrigin: true,
       },
     },

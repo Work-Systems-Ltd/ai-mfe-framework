@@ -28,7 +28,11 @@ async def proxy_to_app(app_name: str, path: str, request: Request) -> Response:
     # Route to backend or frontend based on path
     if path.startswith("api/") or path == "api":
         target_base = registered_app.backend_url
+        forward_path = path
     else:
         target_base = registered_app.frontend_url
+        # Preserve the full path prefix so the frontend's base URL matches
+        prefix = registered_app.path_prefix.strip("/")
+        forward_path = f"{prefix}/{path}" if path else prefix
 
-    return await proxy_request(request, target_base, path)
+    return await proxy_request(request, target_base, forward_path)
