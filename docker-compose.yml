@@ -1,0 +1,171 @@
+services:
+  # ============================================================
+  # Infrastructure
+  # ============================================================
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 5s
+      retries: 5
+
+  keycloak:
+    build:
+      context: ./apps/auth/keycloak
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "${KEYCLOAK_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  openfga-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: openfga
+      POSTGRES_USER: openfga
+      POSTGRES_PASSWORD: openfga
+    volumes:
+      - openfga_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openfga"]
+      interval: 5s
+      retries: 5
+
+  openfga-migrate:
+    image: openfga/openfga:latest
+    command: migrate
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://openfga:openfga@openfga-postgres:5432/openfga?sslmode=disable
+    depends_on:
+      openfga-postgres:
+        condition: service_healthy
+
+  openfga:
+    image: openfga/openfga:latest
+    command: run
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://openfga:openfga@openfga-postgres:5432/openfga?sslmode=disable
+      OPENFGA_PLAYGROUND_ENABLED: "true"
+    ports:
+      - "${OPENFGA_PORT:-8081}:8080"
+      - "${OPENFGA_PLAYGROUND_PORT:-3000}:3000"
+    depends_on:
+      openfga-migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/healthz || exit 1"]
+      interval: 5s
+      retries: 5
+
+  # ============================================================
+  # Shell (entry point)
+  # ============================================================
+  shell-backend:
+    build:
+      context: .
+      dockerfile: apps/shell/backend/Dockerfile
+    environment:
+      APP_NAME: shell
+      APP_PORT: "8000"
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: mfe
+      KEYCLOAK_CLIENT_ID: mfe-services
+      KEYCLOAK_CLIENT_SECRET: mfe-services-secret
+      OPENFGA_API_URL: http://openfga:8080
+    ports:
+      - "${SHELL_BACKEND_PORT:-8000}:8000"
+    depends_on:
+      - keycloak
+      - openfga
+
+  shell-frontend:
+    build:
+      context: .
+      dockerfile: apps/shell/frontend/Dockerfile
+    environment:
+      VITE_API_URL: http://localhost:${SHELL_BACKEND_PORT:-8000}
+      VITE_KEYCLOAK_URL: http://localhost:${KEYCLOAK_PORT:-8080}
+      VITE_KEYCLOAK_REALM: mfe
+      VITE_KEYCLOAK_CLIENT_ID: mfe-shell
+    ports:
+      - "${SHELL_FRONTEND_PORT:-5173}:5173"
+    depends_on:
+      - shell-backend
+
+  # ============================================================
+  # Permissions
+  # ============================================================
+  permissions-backend:
+    build:
+      context: .
+      dockerfile: apps/permissions/backend/Dockerfile
+    environment:
+      APP_NAME: permissions
+      APP_PORT: "8000"
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      SHELL_REGISTER_ADDRESS: http://shell-backend:8000
+      APP_BACKEND_URL: http://permissions-backend:8000
+      APP_FRONTEND_URL: ""
+      APP_PATH_PREFIX: /apps/permissions
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: mfe
+      OPENFGA_API_URL: http://openfga:8080
+    depends_on:
+      - shell-backend
+      - openfga
+
+  # ============================================================
+  # Example App 1
+  # ============================================================
+  example-app-backend:
+    build:
+      context: .
+      dockerfile: apps/mfe-example-app-1/backend/Dockerfile
+    environment:
+      APP_NAME: example1
+      APP_PORT: "8000"
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      SHELL_REGISTER_ADDRESS: http://shell-backend:8000
+      APP_FRONTEND_URL: http://example-app-frontend:5174
+      APP_BACKEND_URL: http://example-app-backend:8000
+      APP_PATH_PREFIX: /apps/example1
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: mfe
+      KEYCLOAK_CLIENT_ID: mfe-services
+      KEYCLOAK_CLIENT_SECRET: mfe-services-secret
+      OPENFGA_API_URL: http://openfga:8080
+    depends_on:
+      - shell-backend
+      - keycloak
+
+  example-app-frontend:
+    build:
+      context: .
+      dockerfile: apps/mfe-example-app-1/frontend/Dockerfile
+    environment:
+      VITE_APP_BASE: /apps/example1/
+      VITE_API_URL: http://localhost:${SHELL_BACKEND_PORT:-8000}/apps/example1/api
+    ports:
+      - "${EXAMPLE_APP_FRONTEND_PORT:-5174}:5174"
+
+volumes:
+  postgres_data:
+  openfga_postgres_data:

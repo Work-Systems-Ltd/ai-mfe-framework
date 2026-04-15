@@ -1,0 +1,41 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "common/templates/frontend/**"
+      - "apps/*/frontend/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "common/templates/frontend/**"
+      - "apps/*/frontend/**"
+
+jobs:
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app:
+          - apps/shell/frontend
+          - apps/mfe-example-app-1/frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install common frontend deps
+        working-directory: common/templates/frontend
+        run: npm install
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.app }}
+        run: npm install
+
+      - name: TypeScript check
+        working-directory: ${{ matrix.app }}
+        run: npx vue-tsc --noEmit

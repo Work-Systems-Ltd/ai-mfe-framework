@@ -1,0 +1,52 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "common/templates/backend/**"
+      - "apps/*/backend/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "common/templates/backend/**"
+      - "apps/*/backend/**"
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app:
+          - common/templates/backend
+          - apps/shell/backend
+          - apps/permissions/backend
+          - apps/mfe-example-app-1/backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.5
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.app }}
+        run: poetry install
+
+      - name: Ruff lint
+        working-directory: ${{ matrix.app }}
+        run: |
+          poetry run ruff check src/ tests/
+          poetry run ruff format --check src/ tests/
+
+      - name: Mypy type check
+        working-directory: ${{ matrix.app }}
+        run: poetry run mypy src/
+
+      - name: Pytest
+        working-directory: ${{ matrix.app }}
+        run: poetry run pytest --tb=short

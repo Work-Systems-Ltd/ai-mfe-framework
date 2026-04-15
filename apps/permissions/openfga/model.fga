@@ -1,0 +1,22 @@
+model
+  schema 1.1
+
+type user
+
+type organization
+  relations
+    define member: [user]
+    define admin: [user]
+
+type app
+  relations
+    define owner: [organization]
+    define can_access: member from owner
+
+type resource
+  relations
+    define owner: [app]
+    define viewer: [user, organization#member]
+    define editor: [user, organization#admin]
+    define can_view: viewer or editor
+    define can_edit: editor

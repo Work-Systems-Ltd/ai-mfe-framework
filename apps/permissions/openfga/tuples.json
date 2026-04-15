@@ -1,0 +1,30 @@
+{
+  "description": "Seed tuples for development",
+  "tuples": [
+    {
+      "user": "user:testuser",
+      "relation": "member",
+      "object": "organization:default"
+    },
+    {
+      "user": "user:admin",
+      "relation": "admin",
+      "object": "organization:default"
+    },
+    {
+      "user": "organization:default",
+      "relation": "owner",
+      "object": "app:example1"
+    },
+    {
+      "user": "organization:default#member",
+      "relation": "viewer",
+      "object": "resource:sample-item-1"
+    },
+    {
+      "user": "organization:default#admin",
+      "relation": "editor",
+      "object": "resource:sample-item-1"
+    }
+  ]
+}

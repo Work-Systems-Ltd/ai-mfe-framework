@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "mfe-permissions-backend"
+version = "0.1.0"
+description = "Permissions service - OpenFGA wrapper API"
+authors = []
+packages = [{ include = "permissions_app", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+mfe-backend-common = { path = "../../../common/templates/backend", develop = true }
+fastapi = "^0.115.0"
+uvicorn = { version = "^0.34.0", extras = ["standard"] }
+pydantic = "^2.10.0"
+pydantic-settings = "^2.7.0"
+httpx = "^0.28.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.0"
+pytest-asyncio = "^0.25.0"
+mypy = "^1.14.0"
+ruff = "^0.9.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM", "TCH"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

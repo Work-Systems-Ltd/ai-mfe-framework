@@ -1,0 +1,45 @@
+{
+  "name": "mfe-framework",
+  "displayName": "MFE Framework",
+  "description": "VS Code extension for MFE micro-frontend framework development",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "workspaceContains:docker-compose.yml",
+    "workspaceContains:common/templates/backend"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "mfe.scaffoldApp",
+        "title": "MFE: Scaffold New App"
+      },
+      {
+        "command": "mfe.startDev",
+        "title": "MFE: Start Dev Environment"
+      },
+      {
+        "command": "mfe.openShell",
+        "title": "MFE: Open Shell in Browser"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.95.0",
+    "@types/node": "^22.0.0",
+    "typescript": "~5.7.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "eslint": "^9.16.0"
+  }
+}
