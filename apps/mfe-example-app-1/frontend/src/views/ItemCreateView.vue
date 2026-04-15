@@ -15,7 +15,7 @@ async function createItem(): Promise<void> {
       method: "POST",
       body: JSON.stringify({ name: name.value, description: description.value }),
     });
-    router.push("/items");
+    router.push({ name: "example1-item-list" });
   } catch (error) {
     console.error("Failed to create item:", error);
   } finally {
