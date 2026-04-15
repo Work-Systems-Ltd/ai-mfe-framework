@@ -35,4 +35,9 @@ export default defineConfig({
       interval: 1000,
     },
   },
+  preview: {
+    port: 5174,
+    cors: true,
+    allowedHosts: true,
+  },
 });

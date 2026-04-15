@@ -3,19 +3,16 @@ import AppLayout from "../layouts/AppLayout.vue";
 import DashboardView from "../views/DashboardView.vue";
 import RemoteAppView from "../views/RemoteAppView.vue";
 
-// Lazy-load remote route definitions
-async function loadRemoteRoutes(remoteName: string): Promise<RouteRecordRaw[]> {
-  const remoteModules: Record<string, () => Promise<{ routes: RouteRecordRaw[] }>> = {
-    example1: () => import("example1/routes"),
-  };
+// Registry of remote module loaders
+const remoteLoaders: Record<string, () => Promise<{ routes: RouteRecordRaw[] }>> = {
+  example1: () => import("example1/routes"),
+};
 
-  const loader = remoteModules[remoteName];
-  if (!loader) return [];
+// Track which remotes have been loaded
+const loadedRemotes = new Set<string>();
 
-  const mod = await loader();
-  return mod.routes;
-}
-
+// Build initial routes - remote apps get a parent route,
+// children are added dynamically on first navigation
 export const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -29,35 +26,36 @@ export const router = createRouter({
           component: DashboardView,
         },
         {
-          path: "app/example1/:pathMatch(.*)*",
+          path: "app/example1",
           name: "mfe-example1",
           component: RemoteAppView,
           meta: { remoteName: "example1" },
+          children: [],
         },
       ],
     },
   ],
 });
 
-// Dynamically add remote routes on first navigation
-let remoteRoutesLoaded = false;
-
+// Load remote routes before navigation
 router.beforeEach(async (to) => {
-  if (remoteRoutesLoaded) return;
-  if (!to.meta.remoteName) return;
+  // Check if navigating to a remote app that hasn't been loaded yet
+  const matched = to.matched.find((r) => r.meta.remoteName);
+  if (!matched) return;
 
-  const remoteName = to.meta.remoteName as string;
-  const remoteRoutes = await loadRemoteRoutes(remoteName);
+  const remoteName = matched.meta.remoteName as string;
+  if (loadedRemotes.has(remoteName)) return;
 
-  // Find the parent route and add remote routes as children
-  const parentRoute = router.getRoutes().find((r) => r.name === `mfe-${remoteName}`);
-  if (parentRoute) {
-    for (const route of remoteRoutes) {
-      router.addRoute(`mfe-${remoteName}`, route);
-    }
-    remoteRoutesLoaded = true;
+  const loader = remoteLoaders[remoteName];
+  if (!loader) return;
 
-    // Re-navigate to resolve the newly added routes
-    return to.fullPath;
+  const mod = await loader();
+
+  for (const route of mod.routes) {
+    router.addRoute(`mfe-${remoteName}`, route);
   }
+  loadedRemotes.add(remoteName);
+
+  // Re-navigate so the newly added child routes can match
+  return to.fullPath;
 });

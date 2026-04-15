@@ -57,4 +57,21 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    port: 5173,
+    proxy: {
+      "/api": {
+        target: backendTarget,
+        changeOrigin: true,
+      },
+      "/internal": {
+        target: backendTarget,
+        changeOrigin: true,
+      },
+      "/apps/example1/api": {
+        target: backendTarget,
+        changeOrigin: true,
+      },
+    },
+  },
 });
