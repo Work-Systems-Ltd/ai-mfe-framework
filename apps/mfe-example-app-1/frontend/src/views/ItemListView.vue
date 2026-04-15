@@ -31,14 +31,14 @@ onMounted(async () => {
         to="/items/new"
         class="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90"
       >
-        Create Itemz
+        Create Item
       </router-link>
     </div>
 
     <div v-if="loading" class="text-muted-foreground">Loading items...</div>
 
     <div v-else-if="items.length === 0" class="text-center py-8 text-muted-foreground">
-      No items yet. Create your first item!
+      No items yetsss. Create your first item!
     </div>
 
     <div v-else class="space-y-3">
@@ -54,3 +54,7 @@ onMounted(async () => {
     </div>
   </div>
 </template>
+<!-- test Wed 15 Apr 2026 06:38:46 AM UTC -->
+<!-- polling-test Wed 15 Apr 2026 06:40:20 AM UTC -->
+<!-- HOST WRITE Wed 15 Apr 2026 06:45:12 AM UTC -->
+<!-- POLL TEST Wed 15 Apr 2026 06:45:38 AM UTC -->

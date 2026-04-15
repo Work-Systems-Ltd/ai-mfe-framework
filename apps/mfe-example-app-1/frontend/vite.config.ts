@@ -18,5 +18,15 @@ export default defineConfig({
   server: {
     port: 5174,
     allowedHosts: true,
+    hmr: {
+      host: "localhost",
+      port: 5174,
+      protocol: "ws",
+    },
+    watch: {
+      // Use polling since inotify doesn't work across Docker bind mounts
+      usePolling: true,
+      interval: 1000,
+    },
   },
 });

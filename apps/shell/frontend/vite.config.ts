@@ -2,6 +2,8 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
 
+const backendTarget = process.env.PROXY_TARGET || "http://localhost:8000";
+
 export default defineConfig({
   plugins: [vue()],
   resolve: {
@@ -9,7 +11,6 @@ export default defineConfig({
       "@": resolve(__dirname, "src"),
       "@common": resolve(__dirname, "../../../common/templates/frontend/src"),
     },
-    // Ensure imports from @common resolve deps from this app's node_modules
     dedupe: ["vue", "pinia", "vue-router", "keycloak-js"],
   },
   optimizeDeps: {
@@ -18,17 +19,32 @@ export default defineConfig({
   server: {
     port: 5173,
     allowedHosts: true,
+    watch: {
+      usePolling: true,
+      interval: 1000,
+    },
     proxy: {
       "/api": {
-        target: process.env.PROXY_TARGET || "http://localhost:8000",
+        target: backendTarget,
         changeOrigin: true,
       },
       "/internal": {
-        target: process.env.PROXY_TARGET || "http://localhost:8000",
+        target: backendTarget,
         changeOrigin: true,
       },
+      // In dev: proxy example app frontend directly to its Vite dev server
+      // and API calls to the shell backend (which proxies to the app backend)
+      "/apps/example1/api": {
+        target: backendTarget,
+        changeOrigin: true,
+      },
+      "/apps/example1": {
+        target: process.env.EXAMPLE1_FRONTEND || "http://localhost:5174",
+        changeOrigin: true,
+      },
+      // Fallback: any other /apps/* goes to shell backend
       "/apps": {
-        target: process.env.PROXY_TARGET || "http://localhost:8000",
+        target: backendTarget,
         changeOrigin: true,
       },
     },
