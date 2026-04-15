@@ -3,7 +3,10 @@ import vue from "@vitejs/plugin-vue";
 import federation from "@originjs/vite-plugin-federation";
 import { resolve } from "path";
 
+const remoteBase = process.env.REMOTE_BASE_URL || "http://localhost:5174";
+
 export default defineConfig({
+  base: `${remoteBase}/`,
   plugins: [
     vue(),
     federation({

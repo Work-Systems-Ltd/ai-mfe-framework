@@ -7,7 +7,7 @@
 </script>
 
 <template>
-  <div class="h-full">
+  <div class="h-full overflow-auto p-8">
     <router-view />
   </div>
 </template>

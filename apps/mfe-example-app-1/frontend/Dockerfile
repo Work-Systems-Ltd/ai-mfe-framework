@@ -13,6 +13,10 @@ WORKDIR /repo/apps/mfe-example-app-1/frontend
 RUN npm install
 
 COPY apps/mfe-example-app-1/frontend/ ./
+
+ARG REMOTE_BASE_URL=http://localhost:5174
+ENV REMOTE_BASE_URL=$REMOTE_BASE_URL
+
 RUN npm run build
 
 FROM nginx:alpine

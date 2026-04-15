@@ -21,6 +21,11 @@ class Item(BaseModel):
     owner_id: str
 
 
+class CreateItemRequest(BaseModel):
+    name: str
+    description: str
+
+
 _items: dict[str, Item] = {
     "1": Item(id="1", name="Sample Item", description="A sample item for demonstration", owner_id="testuser"),
     "2": Item(id="2", name="Another Item", description="Another demo item", owner_id="admin"),
@@ -44,13 +49,12 @@ async def get_item(item_id: str, user: UserInfo = Depends(get_current_user)) -> 
 
 @router.post("")
 async def create_item(
-    name: str,
-    description: str,
+    body: CreateItemRequest,
     user: UserInfo = Depends(get_current_user),
 ) -> Item:
     """Create a new item (authenticated)."""
     item_id = str(len(_items) + 1)
-    item = Item(id=item_id, name=name, description=description, owner_id=user.sub)
+    item = Item(id=item_id, name=body.name, description=body.description, owner_id=user.sub)
     _items[item_id] = item
     return item
 
